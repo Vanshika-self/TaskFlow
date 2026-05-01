@@ -5,25 +5,32 @@ const { initDB } = require('./db');
 
 const app = express();
 
-// ✅ FIXED CORS CONFIG
+// ✅ CORS FIXED (PRODUCTION SAFE)
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://task-flow-5j9k-cyju70ewz-vanshika-selfs-projects.vercel.app"
+  "https://task-flow-5j9k-g7m1rlbf5-vanshika-selfs-projects.vercel.app"
 ];
 
-app.use(cors({
+const corsOptions = {
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
+      callback(null, true);
     } else {
-      return callback(new Error("Not allowed by CORS"));
+      console.log("❌ Blocked by CORS:", origin);
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
-}));
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+
+// ✅ IMPORTANT: handle preflight requests
+app.options("*", cors(corsOptions));
 
 app.use(express.json());
 
